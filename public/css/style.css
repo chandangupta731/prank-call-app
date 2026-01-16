@@ -269,3 +269,27 @@ body, html {
     70% { box-shadow: 0 0 0 15px rgba(48, 209, 88, 0); }
     100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0); }
 }
+
+.call-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+}
+
+.control-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    font-size: 22px;
+    background: #222;
+    color: white;
+    cursor: pointer;
+}
+
+.control-btn.end {
+    background: red;
+}

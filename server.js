@@ -4,36 +4,54 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const path = require('path');
 
-// Serve files from the 'public' folder
+// Serve public files
 app.use(express.static(path.join(__dirname, 'public')));
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    // Join a specific room (e.g., room-1)
-    socket.on('join_room', (roomId) => {
+    // Join room
+    socket.on('join_room', async (roomId) => {
         socket.join(roomId);
+
+        const clients = await io.in(roomId).allSockets();
         console.log(`User ${socket.id} joined room: ${roomId}`);
+        console.log(`Room ${roomId} now has ${clients.size} client(s)`);
     });
 
-    // Admin triggers the call
+    // Admin starts call → notify everyone else in room
     socket.on('start_call', (roomId) => {
-        // Send 'incoming_call' signal ONLY to the user in that room
+        console.log(`Admin triggered call in room: ${roomId}`);
         socket.to(roomId).emit('incoming_call');
     });
 
-    // WebRTC Signaling (To let Admin see User's face)
-    // When User sends their video stream offer
+    // ---------- WEBRTC SIGNALING ----------
+
+    // Forward Offer (User → Admin)
     socket.on('webrtc_offer', (data) => {
+        console.log(`Forwarding OFFER in room ${data.roomId}`);
         socket.to(data.roomId).emit('webrtc_offer', data.sdp);
     });
-    // When Admin answers
+
+    // Forward Answer (Admin → User)
     socket.on('webrtc_answer', (data) => {
+        console.log(`Forwarding ANSWER in room ${data.roomId}`);
         socket.to(data.roomId).emit('webrtc_answer', data.sdp);
     });
-    // ICE Candidates (Network details)
+
+    // Forward ICE Candidates (both sides)
     socket.on('webrtc_ice_candidate', (data) => {
         socket.to(data.roomId).emit('webrtc_ice_candidate', data.candidate);
+    });
+
+    // ---------- NEW: END CALL HANDLING ----------
+    socket.on('end_call', (roomId) => {
+        console.log(`Call ended in room: ${roomId}`);
+        socket.to(roomId).emit('call_ended');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
     });
 });
 
