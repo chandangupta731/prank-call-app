@@ -1,0 +1,291 @@
+:root {
+    --primary-color: #2ecc71;
+    --danger-color: #ff3b30;
+    --bg-dark: #000;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevents scrolling */
+    background: var(--bg-dark);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* --- 1. WAITING ROOM (Clean Mobile Look) --- */
+#waiting-room {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh; /* Dynamic Viewport Height for Mobile */
+    background: #f2f2f7;
+    color: #1c1c1e;
+    text-align: center;
+    padding: 20px;
+}
+
+.loader {
+    border: 4px solid #e5e5ea;
+    border-top: 4px solid #007aff;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 24px;
+}
+
+#waiting-room h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+#waiting-room p {
+    font-size: 15px;
+    color: #8e8e93;
+    max-width: 80%;
+}
+
+/* --- 2. VIDEO CALL INTERFACE --- */
+#video-interface {
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    background: black;
+}
+
+/* The Fake Video - COVERS WHOLE SCREEN */
+#main-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures video fills screen without stretching */
+    z-index: 1;
+}
+
+/* The User's Selfie Box (Floating PiP) */
+#my-camera {
+    position: absolute;
+    bottom: 30px; /* lifted slightly */
+    right: 20px;
+    width: 30vw; /* 30% of screen width */
+    max-width: 140px; /* Cap it for huge phones */
+    aspect-ratio: 9/16; /* Portrait ratio */
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: #1a1a1a;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    z-index: 10;
+}
+
+/* --- 3. INCOMING CALL SCREEN (Realism) --- */
+#call-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100dvh;
+    background: rgba(0, 0, 0, 0.92); /* Dark blur effect */
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes buttons to bottom */
+    align-items: center;
+    padding: 60px 20px;
+    z-index: 50;
+    color: white;
+}
+
+.modal-content {
+    text-align: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.modal-content h1 {
+    font-size: 32px;
+    font-weight: 400;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+}
+
+.modal-content p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+}
+
+/* Buttons at the bottom (Thumb Zone) */
+.buttons {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 50px; /* Space from bottom edge */
+}
+
+.buttons button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    font-size: 32px; /* Icon size */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.buttons button:active {
+    transform: scale(0.95);
+}
+
+.green-btn {
+    background: var(--primary-color);
+}
+
+.red-btn {
+    background: var(--danger-color);
+}
+
+/* Utility to hide things */
+.hidden {
+    display: none !important;
+}
+
+/* Animation for loader */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- 3. INCOMING CALL SCREEN (iOS Look) --- */
+#call-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100dvh;
+    /* Dark gradient background looking like a blurred wallpaper */
+    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 80px 40px;
+    z-index: 50;
+    color: white;
+}
+
+/* TOP INFO */
+.caller-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.avatar-circle {
+    width: 100px;
+    height: 100px;
+    background: #8e8e93; /* iOS grey */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.initials {
+    font-size: 45px;
+    font-weight: 500;
+    color: white;
+}
+
+#call-modal h1 {
+    font-size: 38px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+#call-modal p {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 8px;
+    font-weight: 400;
+}
+
+/* BUTTONS BOTTOM */
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: 40px;
+}
+
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.buttons button {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.buttons button:active {
+    transform: scale(0.9);
+    opacity: 0.8;
+}
+
+.green-btn {
+    background: #30d158; /* iOS Green */
+    box-shadow: 0 4px 20px rgba(46, 204, 113, 0.4);
+    animation: pulse 1.5s infinite; /* Pulsing effect */
+}
+
+.red-btn {
+    background: #ff453a; /* iOS Red */
+}
+
+.btn-label {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(48, 209, 88, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0); }
+}

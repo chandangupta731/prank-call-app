@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #333; color: white; }
+        .controls { margin-bottom: 20px; padding: 20px; background: #444; border-radius: 8px; }
+        input { padding: 10px; }
+        button { padding: 10px 20px; background: red; color: white; border: none; cursor: pointer; font-size: 16px; }
+        #remote-view { width: 300px; height: 200px; background: black; border: 2px solid #fff; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Admin Control</h1>
+    
+    <div class="controls">
+        <label>Room ID:</label>
+        <input type="text" id="room-input" value="room-1">
+        <button id="call-btn">📞 START FAKE CALL</button>
+    </div>
+
+    <h3>User's Live Feed (WebRTC):</h3>
+    <video id="remote-view" autoplay playsinline></video>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
