@@ -293,3 +293,18 @@ body, html {
 .control-btn.end {
     background: red;
 }
+
+#my-camera {
+    position: fixed;
+    width: 120px;
+    height: 160px;
+    border-radius: 12px;
+    border: 2px solid white;
+    object-fit: cover;
+    cursor: grab;
+    z-index: 1000;
+    transition: transform 0.2s ease-out;
+    bottom: 20px;
+    right: 20px;
+}
+

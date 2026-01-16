@@ -131,7 +131,7 @@ videoBtn.addEventListener('click', () => {
     videoBtn.textContent = videoEnabled ? "📷" : "🚫";
 });
 
-// END CALL — FINAL FIXED VERSION
+// END CALL (CUT CALL) — BULLET PROOF FIX
 endCallBtn.addEventListener('click', () => {
 
     // Stop camera & mic tracks
@@ -140,7 +140,7 @@ endCallBtn.addEventListener('click', () => {
         localStream = null;
     }
 
-    // 🔹 HARD STOP FOR VIDEO (prevents replay)
+    // HARD STOP for fake video (prevents any sound returning)
     mainVideo.pause();
     mainVideo.src = "";
     mainVideo.srcObject = null;
@@ -160,3 +160,100 @@ endCallBtn.addEventListener('click', () => {
     // Notify Admin
     socket.emit('end_call', roomId);
 });
+
+// =========================
+// 🎯 DRAGGABLE SMALL CAMERA
+// =========================
+
+let isDragging = false;
+let offsetX = 0;
+let offsetY = 0;
+
+// Start Drag
+myVideo.addEventListener('mousedown', startDrag);
+myVideo.addEventListener('touchstart', startDrag);
+
+function startDrag(e) {
+    isDragging = true;
+    myVideo.style.cursor = "grabbing";
+
+    const rect = myVideo.getBoundingClientRect();
+
+    if (e.type === "touchstart") {
+        offsetX = e.touches[0].clientX - rect.left;
+        offsetY = e.touches[0].clientY - rect.top;
+    } else {
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+    }
+}
+
+// Move
+document.addEventListener('mousemove', drag);
+document.addEventListener('touchmove', drag);
+
+function drag(e) {
+    if (!isDragging) return;
+
+    let x, y;
+
+    if (e.type === "touchmove") {
+        x = e.touches[0].clientX - offsetX;
+        y = e.touches[0].clientY - offsetY;
+    } else {
+        x = e.clientX - offsetX;
+        y = e.clientY - offsetY;
+    }
+
+    myVideo.style.left = x + "px";
+    myVideo.style.top = y + "px";
+    myVideo.style.bottom = "auto";
+    myVideo.style.right = "auto";
+}
+
+// Release + Snap to nearest corner
+document.addEventListener('mouseup', stopDrag);
+document.addEventListener('touchend', stopDrag);
+
+function stopDrag() {
+    if (!isDragging) return;
+
+    isDragging = false;
+    myVideo.style.cursor = "grab";
+
+    const rect = myVideo.getBoundingClientRect();
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    const distances = {
+        topLeft: Math.hypot(rect.left, rect.top),
+        topRight: Math.hypot(screenWidth - rect.right, rect.top),
+        bottomLeft: Math.hypot(rect.left, screenHeight - rect.bottom),
+        bottomRight: Math.hypot(screenWidth - rect.right, screenHeight - rect.bottom)
+    };
+
+    const closest = Object.keys(distances).reduce((a, b) =>
+        distances[a] < distances[b] ? a : b
+    );
+
+    // Reset positioning
+    myVideo.style.top = "";
+    myVideo.style.bottom = "";
+    myVideo.style.left = "";
+    myVideo.style.right = "";
+
+    // Snap to closest corner
+    if (closest === "topLeft") {
+        myVideo.style.top = "20px";
+        myVideo.style.left = "20px";
+    } else if (closest === "topRight") {
+        myVideo.style.top = "20px";
+        myVideo.style.right = "20px";
+    } else if (closest === "bottomLeft") {
+        myVideo.style.bottom = "20px";
+        myVideo.style.left = "20px";
+    } else {
+        myVideo.style.bottom = "20px";
+        myVideo.style.right = "20px";
+    }
+}
