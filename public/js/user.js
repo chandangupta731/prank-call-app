@@ -12,13 +12,13 @@ const acceptBtn = document.getElementById('accept-btn');
 const myVideo = document.getElementById('my-camera');
 const mainVideo = document.getElementById('main-video');
 
-// NEW CONTROL BUTTONS
+// CALL CONTROL BUTTONS
 const micBtn = document.getElementById('mic-btn');
 const videoBtn = document.getElementById('video-btn');
 const endCallBtn = document.getElementById('end-call-btn');
 
-let localStream;
-let peerConnection;
+let localStream = null;
+let peerConnection = null;
 let micEnabled = true;
 let videoEnabled = true;
 
@@ -93,7 +93,9 @@ function createPeerConnection() {
 
 // Receive Answer from Admin
 socket.on('webrtc_answer', (sdp) => {
-    peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+    if (peerConnection) {
+        peerConnection.setRemoteDescription(new RTCSessionDescription(sdp));
+    }
 });
 
 // Receive ICE candidates
@@ -103,13 +105,14 @@ socket.on('webrtc_ice_candidate', (candidate) => {
     }
 });
 
-
 // =========================
 // 🎯 CALL CONTROL BUTTONS
 // =========================
 
 // MIC ON / OFF
 micBtn.addEventListener('click', () => {
+    if (!localStream) return;
+
     const audioTrack = localStream.getAudioTracks()[0];
     audioTrack.enabled = !audioTrack.enabled;
     micEnabled = audioTrack.enabled;
@@ -119,6 +122,8 @@ micBtn.addEventListener('click', () => {
 
 // VIDEO ON / OFF
 videoBtn.addEventListener('click', () => {
+    if (!localStream) return;
+
     const videoTrack = localStream.getVideoTracks()[0];
     videoTrack.enabled = !videoTrack.enabled;
     videoEnabled = videoTrack.enabled;
@@ -126,11 +131,20 @@ videoBtn.addEventListener('click', () => {
     videoBtn.textContent = videoEnabled ? "📷" : "🚫";
 });
 
-// END CALL (CUT CALL)
+// END CALL (CUT CALL) — 🔧 FIXED VERSION
 endCallBtn.addEventListener('click', () => {
 
-    // Stop all media tracks
-    localStream.getTracks().forEach(track => track.stop());
+    // Stop camera & mic tracks
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+    }
+
+    // 🔹 FIX: Stop fake video + reset (so NO sound remains)
+    mainVideo.pause();
+    mainVideo.currentTime = 0;
+    mainVideo.removeAttribute("src");   // fully detach source
+    mainVideo.load();                   // reload so it truly stops
 
     // Close WebRTC connection
     if (peerConnection) {
@@ -142,6 +156,6 @@ endCallBtn.addEventListener('click', () => {
     videoInterface.classList.add('hidden');
     waitingRoom.classList.remove('hidden');
 
-    // Notify Admin (optional but recommended)
+    // Notify Admin
     socket.emit('end_call', roomId);
 });
