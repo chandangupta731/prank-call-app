@@ -303,7 +303,7 @@ body, html {
     object-fit: cover;
     cursor: grab;
     z-index: 1000;
-    transition: transform 0.2s ease-out;
+    transition: all 0.2s ease-out;
     bottom: 20px;
     right: 20px;
 }

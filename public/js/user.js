@@ -39,20 +39,13 @@ acceptBtn.addEventListener('click', () => {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         .then(stream => {
 
-            // UI Switch
             callModal.classList.add('hidden');
             videoInterface.classList.remove('hidden');
 
-            // Save stream
             localStream = stream;
-
-            // Show user's camera
             myVideo.srcObject = stream;
-
-            // Play fake admin video
             mainVideo.play();
 
-            // Start WebRTC
             createPeerConnection();
         })
         .catch(err => {
@@ -65,12 +58,10 @@ acceptBtn.addEventListener('click', () => {
 function createPeerConnection() {
     peerConnection = new RTCPeerConnection(rtcConfig);
 
-    // Add local tracks
     localStream.getTracks().forEach(track => {
         peerConnection.addTrack(track, localStream);
     });
 
-    // Create Offer
     peerConnection.createOffer()
         .then(offer => peerConnection.setLocalDescription(offer))
         .then(() => {
@@ -80,7 +71,6 @@ function createPeerConnection() {
             });
         });
 
-    // Send ICE candidates
     peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
             socket.emit('webrtc_ice_candidate', {
@@ -131,38 +121,33 @@ videoBtn.addEventListener('click', () => {
     videoBtn.textContent = videoEnabled ? "📷" : "🚫";
 });
 
-// END CALL (CUT CALL) — BULLET PROOF FIX
+// END CALL (CUT CALL)
 endCallBtn.addEventListener('click', () => {
 
-    // Stop camera & mic tracks
     if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
         localStream = null;
     }
 
-    // HARD STOP for fake video (prevents any sound returning)
     mainVideo.pause();
     mainVideo.src = "";
     mainVideo.srcObject = null;
     mainVideo.load();
     mainVideo.muted = true;
 
-    // Close WebRTC connection
     if (peerConnection) {
         peerConnection.close();
         peerConnection = null;
     }
 
-    // Reset UI
     videoInterface.classList.add('hidden');
     waitingRoom.classList.remove('hidden');
 
-    // Notify Admin
     socket.emit('end_call', roomId);
 });
 
 // =========================
-// 🎯 DRAGGABLE SMALL CAMERA
+// 🎯 DRAGGABLE + EDGE-STICKY CAMERA (NEW)
 // =========================
 
 let isDragging = false;
@@ -211,7 +196,7 @@ function drag(e) {
     myVideo.style.right = "auto";
 }
 
-// Release + Snap to nearest corner
+// Release + Snap to nearest EDGE (not corner)
 document.addEventListener('mouseup', stopDrag);
 document.addEventListener('touchend', stopDrag);
 
@@ -225,16 +210,12 @@ function stopDrag() {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
 
-    const distances = {
-        topLeft: Math.hypot(rect.left, rect.top),
-        topRight: Math.hypot(screenWidth - rect.right, rect.top),
-        bottomLeft: Math.hypot(rect.left, screenHeight - rect.bottom),
-        bottomRight: Math.hypot(screenWidth - rect.right, screenHeight - rect.bottom)
-    };
+    const distLeft = rect.left;
+    const distRight = screenWidth - rect.right;
+    const distTop = rect.top;
+    const distBottom = screenHeight - rect.bottom;
 
-    const closest = Object.keys(distances).reduce((a, b) =>
-        distances[a] < distances[b] ? a : b
-    );
+    const minDist = Math.min(distLeft, distRight, distTop, distBottom);
 
     // Reset positioning
     myVideo.style.top = "";
@@ -242,18 +223,21 @@ function stopDrag() {
     myVideo.style.left = "";
     myVideo.style.right = "";
 
-    // Snap to closest corner
-    if (closest === "topLeft") {
-        myVideo.style.top = "20px";
-        myVideo.style.left = "20px";
-    } else if (closest === "topRight") {
-        myVideo.style.top = "20px";
-        myVideo.style.right = "20px";
-    } else if (closest === "bottomLeft") {
-        myVideo.style.bottom = "20px";
-        myVideo.style.left = "20px";
-    } else {
-        myVideo.style.bottom = "20px";
-        myVideo.style.right = "20px";
+    // Snap to nearest EDGE
+    if (minDist === distLeft) {
+        myVideo.style.left = "10px";
+        myVideo.style.top = `${rect.top}px`;
+    } 
+    else if (minDist === distRight) {
+        myVideo.style.right = "10px";
+        myVideo.style.top = `${rect.top}px`;
+    } 
+    else if (minDist === distTop) {
+        myVideo.style.top = "10px";
+        myVideo.style.left = `${rect.left}px`;
+    } 
+    else {
+        myVideo.style.bottom = "10px";
+        myVideo.style.left = `${rect.left}px`;
     }
 }
