@@ -131,7 +131,7 @@ videoBtn.addEventListener('click', () => {
     videoBtn.textContent = videoEnabled ? "📷" : "🚫";
 });
 
-// END CALL (CUT CALL) — 🔧 FIXED VERSION
+// END CALL — FINAL FIXED VERSION
 endCallBtn.addEventListener('click', () => {
 
     // Stop camera & mic tracks
@@ -140,11 +140,12 @@ endCallBtn.addEventListener('click', () => {
         localStream = null;
     }
 
-    // 🔹 FIX: Stop fake video + reset (so NO sound remains)
+    // 🔹 HARD STOP FOR VIDEO (prevents replay)
     mainVideo.pause();
-    mainVideo.currentTime = 0;
-    mainVideo.removeAttribute("src");   // fully detach source
-    mainVideo.load();                   // reload so it truly stops
+    mainVideo.src = "";
+    mainVideo.srcObject = null;
+    mainVideo.load();
+    mainVideo.muted = true;
 
     // Close WebRTC connection
     if (peerConnection) {
