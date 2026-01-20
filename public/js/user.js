@@ -21,7 +21,7 @@ let localStream = null;
 let peerConnection = null;
 let micEnabled = true;
 let videoEnabled = true;
-let currentVideoSrc = 'assets/fake-video.mp4'; // Default video
+let currentVideoSrc = 'assets/cpl1.MP4'; // Default video
 
 const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 

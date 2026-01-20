@@ -14,6 +14,29 @@ const rtcConfig = {
 const roomId = roomInput.value;
 socket.emit('join_room', roomId);
 
+// Fetch and populate video list
+fetch('/api/videos')
+    .then(response => response.json())
+    .then(videos => {
+        videoSelect.innerHTML = ''; // Clear loading option
+        
+        if (videos.length === 0) {
+            videoSelect.innerHTML = '<option value="">No videos found</option>';
+            return;
+        }
+        
+        videos.forEach(video => {
+            const option = document.createElement('option');
+            option.value = video.path;
+            option.textContent = video.name;
+            videoSelect.appendChild(option);
+        });
+    })
+    .catch(err => {
+        console.error('Error loading videos:', err);
+        videoSelect.innerHTML = '<option value="">Error loading videos</option>';
+    });
+
 // Trigger Call
 callBtn.addEventListener('click', () => {
     const currentRoom = roomInput.value;

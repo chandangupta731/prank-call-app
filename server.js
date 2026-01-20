@@ -3,9 +3,35 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const path = require('path');
+const fs = require('fs');
 
 // Serve public files
 app.use(express.static(path.join(__dirname, 'public')));
+
+// API endpoint to get list of videos from assets folder
+app.get('/api/videos', (req, res) => {
+    const assetsPath = path.join(__dirname, 'public', 'assets');
+    
+    fs.readdir(assetsPath, (err, files) => {
+        if (err) {
+            return res.status(500).json({ error: 'Unable to read assets folder' });
+        }
+        
+        // Filter only video files (mp4, webm, mov, etc.)
+        const videoFiles = files.filter(file => {
+            const ext = path.extname(file).toLowerCase();
+            return ['.mp4', '.webm', '.mov', '.avi', '.mkv'].includes(ext);
+        });
+        
+        // Return as array of objects with filename and path
+        const videos = videoFiles.map(file => ({
+            name: file,
+            path: `assets/${file}`
+        }));
+        
+        res.json(videos);
+    });
+});
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
