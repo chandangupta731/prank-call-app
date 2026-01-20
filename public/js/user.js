@@ -58,8 +58,28 @@ acceptBtn.addEventListener('click', () => {
             // 🔥 AUTO CALL DROP WHEN VIDEO ENDS
             mainVideo.addEventListener('ended', () => {
                 console.log('Video ended, automatically dropping call...');
-                endCallBtn.click(); // Trigger the end call functionality
-            });
+                // Manually trigger cleanup instead of clicking button
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = null;
+                }
+
+                mainVideo.pause();
+                mainVideo.src = "";
+                mainVideo.srcObject = null;
+                mainVideo.load();
+                mainVideo.muted = true;
+
+                if (peerConnection) {
+                    peerConnection.close();
+                    peerConnection = null;
+                }
+
+                videoInterface.classList.add('hidden');
+                waitingRoom.classList.remove('hidden');
+
+                socket.emit('end_call', roomId);
+            }, { once: true }); // Ensure this only fires once
 
             createPeerConnection();
         })
@@ -108,6 +128,30 @@ socket.on('webrtc_ice_candidate', (candidate) => {
     if (peerConnection) {
         peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     }
+});
+
+// Listen for call ended by Admin
+socket.on('call_ended', () => {
+    console.log('Admin ended the call');
+    
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+    }
+
+    mainVideo.pause();
+    mainVideo.src = "";
+    mainVideo.srcObject = null;
+    mainVideo.load();
+    mainVideo.muted = true;
+
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+
+    videoInterface.classList.add('hidden');
+    waitingRoom.classList.remove('hidden');
 });
 
 // =========================
