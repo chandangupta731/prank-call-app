@@ -166,7 +166,18 @@ micBtn.addEventListener('click', () => {
     audioTrack.enabled = !audioTrack.enabled;
     micEnabled = audioTrack.enabled;
 
-    micBtn.textContent = micEnabled ? "🎤" : "🔇";
+    const micIcon = document.getElementById('mic-icon');
+    const micOffIcon = document.getElementById('mic-off-icon');
+    
+    if (micEnabled) {
+        micIcon.style.display = 'block';
+        micOffIcon.style.display = 'none';
+        micBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+    } else {
+        micIcon.style.display = 'none';
+        micOffIcon.style.display = 'block';
+        micBtn.style.backgroundColor = 'rgba(255, 0, 0, 0.8)';
+    }
 });
 
 // VIDEO ON / OFF
@@ -177,7 +188,18 @@ videoBtn.addEventListener('click', () => {
     videoTrack.enabled = !videoTrack.enabled;
     videoEnabled = videoTrack.enabled;
 
-    videoBtn.textContent = videoEnabled ? "📷" : "🚫";
+    const videoIcon = document.getElementById('video-icon');
+    const videoOffIcon = document.getElementById('video-off-icon');
+    
+    if (videoEnabled) {
+        videoIcon.style.display = 'block';
+        videoOffIcon.style.display = 'none';
+        videoBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+    } else {
+        videoIcon.style.display = 'none';
+        videoOffIcon.style.display = 'block';
+        videoBtn.style.backgroundColor = 'rgba(255, 0, 0, 0.8)';
+    }
 });
 
 // END CALL (CUT CALL)
