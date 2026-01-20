@@ -20,9 +20,12 @@ io.on('connection', (socket) => {
     });
 
     // Admin starts call → notify everyone else in room
-    socket.on('start_call', (roomId) => {
-        console.log(`Admin triggered call in room: ${roomId}`);
-        socket.to(roomId).emit('incoming_call');
+    socket.on('start_call', (data) => {
+        const roomId = typeof data === 'string' ? data : data.roomId;
+        const videoSrc = typeof data === 'object' ? data.videoSrc : 'assets/fake-video.mp4';
+        
+        console.log(`Admin triggered call in room: ${roomId} with video: ${videoSrc}`);
+        socket.to(roomId).emit('incoming_call', { videoSrc });
     });
 
     // ---------- WEBRTC SIGNALING ----------

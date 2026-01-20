@@ -21,6 +21,7 @@ let localStream = null;
 let peerConnection = null;
 let micEnabled = true;
 let videoEnabled = true;
+let currentVideoSrc = 'assets/fake-video.mp4'; // Default video
 
 const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
@@ -28,7 +29,11 @@ const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 socket.emit('join_room', roomId);
 
 // 2. Listen for "Incoming Call"
-socket.on('incoming_call', () => {
+socket.on('incoming_call', (data) => {
+    // Extract video source if provided
+    if (data && data.videoSrc) {
+        currentVideoSrc = data.videoSrc;
+    }
     waitingRoom.classList.add('hidden');
     callModal.classList.remove('hidden');
 });
@@ -44,7 +49,17 @@ acceptBtn.addEventListener('click', () => {
 
             localStream = stream;
             myVideo.srcObject = stream;
+            
+            // Set the selected video source
+            mainVideo.src = currentVideoSrc;
+            mainVideo.load();
             mainVideo.play();
+            
+            // 🔥 AUTO CALL DROP WHEN VIDEO ENDS
+            mainVideo.addEventListener('ended', () => {
+                console.log('Video ended, automatically dropping call...');
+                endCallBtn.click(); // Trigger the end call functionality
+            });
 
             createPeerConnection();
         })

@@ -1,6 +1,8 @@
 const socket = io();
 const callBtn = document.getElementById('call-btn');
+const endCallAdminBtn = document.getElementById('end-call-admin-btn');
 const roomInput = document.getElementById('room-input');
+const videoSelect = document.getElementById('video-select');
 const remoteView = document.getElementById('remote-view');
 
 let peerConnection;
@@ -15,8 +17,23 @@ socket.emit('join_room', roomId);
 // Trigger Call
 callBtn.addEventListener('click', () => {
     const currentRoom = roomInput.value;
-    socket.emit('start_call', currentRoom);
-    alert(`Call Signal Sent to ${currentRoom}`);
+    const selectedVideo = videoSelect.value;
+    socket.emit('start_call', { roomId: currentRoom, videoSrc: selectedVideo });
+    alert(`Call Signal Sent to ${currentRoom} with video: ${selectedVideo}`);
+});
+
+// End Call (Admin Control)
+endCallAdminBtn.addEventListener('click', () => {
+    const currentRoom = roomInput.value;
+    socket.emit('end_call', currentRoom);
+    
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+    
+    remoteView.srcObject = null;
+    alert(`Call ended in ${currentRoom}`);
 });
 
 // --- WebRTC Logic (Receive User Stream) ---
